@@ -1,0 +1,36 @@
+{
+  "name": "VoiceHelper",
+  "version": "1.0",
+  "manifest_version": 3,
+  "description": "Расширение для хрома с распознаванием голосового ввода",
+  "permissions": [
+    "tabs",
+    "scripting",
+    "storage",
+    "tts",
+    "search",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/voice16.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "icons": {
+    "16": "images/voice16.png"
+  }
+}

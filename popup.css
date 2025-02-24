@@ -1,0 +1,25 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+body{
+    padding: 2em;
+}
+button{
+    padding: .5em;
+    width: 100%;
+    margin-top: .5em;
+    border: 0;
+    color: white;
+    transition: .5s;
+}
+.bg-green{
+    background-color: #355106;;
+}
+.bg-red{
+    background-color: #510606;
+}
+button:hover{
+    transform: scale(1.1);
+    transition: .5s;
+}
