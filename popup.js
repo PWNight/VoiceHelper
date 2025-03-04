@@ -1,80 +1,14 @@
-// Ивент по нажатию на кнопку начать запись
-document.getElementById('start').addEventListener('click', async () => {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const mediaRecorder = new MediaRecorder(stream);
-        const recognition = new webkitSpeechRecognition() || new SpeechRecognition();
-        const statusDiv = document.getElementById('status');
-
-        let fullTranscript = '';
-
-        recognition.lang = 'ru-RU';
-        recognition.interimResults = false;
-
-        // Обновляем статус при старте записи
-        mediaRecorder.onstart = () => {
-            statusDiv.textContent = "Запись запущена...";
-            recognition.start();
-        };
-
-        // Обновляем статус при остановке записи и отправляем результат в обработчик команд
-        mediaRecorder.onstop = () => {
-            statusDiv.textContent = "Запись остановлена. Обработка...";
-            recognition.stop();
-            processCommand(fullTranscript);
-            fullTranscript = '';
-        };
-
-        // При распознавании сообщения записываем текст в переменную
-        recognition.onresult = (event) => {
-            const transcript = event.results[event.resultIndex][0].transcript;
-            fullTranscript += transcript;
-        };
-
-        // Выводим ошибку в консоль при ошибке
-        // TODO: Написать озвучивание ошибки
-        recognition.onerror = (event) => {
-            console.error("Ошибка распознавания речи:", event.error);
-            statusDiv.textContent = "Ошибка распознавания речи: " + event.error;
-        };
-
-        // Запускаем запись голоса и включаем возможность нажать на кнопку остановки
-        mediaRecorder.start();
-        document.getElementById('stop').disabled = false;
-
-        // При нажатии на остановку завершаем запись голоса и отключаем кнопку остановки
-        document.getElementById('stop').addEventListener('click', () => {
-            mediaRecorder.stop();
-            document.getElementById('stop').disabled = true;
-        });
-
-    } catch (error) {
-        // Выводим ошибку в консоль и в статус
-        // TODO: Сделать озвучивание ошибки
-        console.error('Error accessing microphone:', error);
-        const statusDiv = document.getElementById('status');
-        statusDiv.textContent = "Ошибка доступа к микрофону: " + error.message;
-    }
-});
-
-// ДЛЯ ТЕСТИРОВАНИЯ
-// При нажатии на кнопку отправи отправляем текст из инпута в обработчик
-document.getElementById('textSubmit').addEventListener('click', () => {
-    const text = document.getElementById('textInput').value;
-    processCommand(text);
-});
+// Функция для озвучивания текста
+function speak(text) {
+    const synth = window.speechSynthesis;
+    const utterance = new SpeechSynthesisUtterance(text);
+    synth.speak(utterance);
+}
 
 // Функция для обработки команды
 async function processCommand(text) {
     const statusDiv = document.getElementById('status');
     const lowerCaseText = text.toLowerCase();
-    const synth = window.speechSynthesis;
-
-    // Функция для озвучивания текста
-    function speak(text) {
-        const utterance = new SpeechSynthesisUtterance(text);
-        synth.speak(utterance);
-    }
 
     // Действия при команде открыть сайт
     if (lowerCaseText.startsWith('открой сайт')) {
@@ -279,3 +213,70 @@ function extractTextFromElement(element) {
     }
     return textContent;
 }
+
+// Ивент по нажатию на кнопку начать запись
+document.getElementById('start').addEventListener('click', async () => {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream);
+        const recognition = new webkitSpeechRecognition() || new SpeechRecognition();
+        const statusDiv = document.getElementById('status');
+
+        let fullTranscript = '';
+
+        recognition.lang = 'ru-RU';
+        recognition.interimResults = false;
+
+        // Обновляем статус при старте записи
+        mediaRecorder.onstart = () => {
+            statusDiv.textContent = "Запись запущена...";
+            recognition.start();
+        };
+
+        // Обновляем статус при остановке записи и отправляем результат в обработчик команд
+        mediaRecorder.onstop = () => {
+            statusDiv.textContent = "Запись остановлена. Обработка...";
+            recognition.stop();
+            processCommand(fullTranscript);
+            fullTranscript = '';
+        };
+
+        // При распознавании сообщения записываем текст в переменную
+        recognition.onresult = (event) => {
+            const transcript = event.results[event.resultIndex][0].transcript;
+            fullTranscript += transcript;
+        };
+
+        // Выводим ошибку в консоль при ошибке
+        recognition.onerror = (event) => {
+            speak(`Ошибка распознавания речи: ${event.error}`)
+            console.error("Ошибка распознавания речи:", event.error);
+            statusDiv.textContent = "Ошибка распознавания речи: " + event.error;
+        };
+
+        // Запускаем запись голоса и включаем возможность нажать на кнопку остановки
+        mediaRecorder.start();
+        document.getElementById('stop').disabled = false;
+
+        // При нажатии на остановку завершаем запись голоса и отключаем кнопку остановки
+        document.getElementById('stop').addEventListener('click', () => {
+            mediaRecorder.stop();
+            document.getElementById('stop').disabled = true;
+        });
+
+    } catch (error) {
+        // Выводим ошибку в консоль и в статус
+        speak(`Ошибка доступа к микрофону: ${error}`)
+        console.error('Ошибка доступа к микрофону:', error);
+
+        const statusDiv = document.getElementById('status');
+        statusDiv.textContent = "Ошибка доступа к микрофону: " + error.message;
+    }
+});
+
+// ДЛЯ ТЕСТИРОВАНИЯ
+// При нажатии на кнопку отправки отправляем текст из инпута в обработчик
+document.getElementById('textSubmit').addEventListener('click', () => {
+    const text = document.getElementById('textInput').value;
+    processCommand(text);
+});
